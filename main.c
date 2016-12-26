@@ -44,6 +44,20 @@ typedef struct _board {
     short o;
 } Board;
 
+typedef struct _player {
+    short (*f) (Board *board);
+} Player;
+
+typedef struct _game {
+
+    Board board;
+
+    Player x_player;
+    Player o_player;
+
+} Game;
+
+
 
 void init_board(Board *board) {
     memset(board, 0, sizeof(Board));
