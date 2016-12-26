@@ -234,7 +234,7 @@ void make_best_move(Board *board, enum Sides side) {
             else
                 new_board.o |= position;
         
-            num_moves = can_win_in(board, side, 0);
+            num_moves = can_win_in(&new_board, side, 0);
             if (num_moves <= min_num_moves) {
                 min_position = position;
                 min_num_moves = num_moves;
@@ -264,6 +264,7 @@ int main() {
     Board board;
     short moves;
     int num_moves;
+    enum Sides winner;
 
     init_board(&board);
     board.o = 0600;
@@ -275,16 +276,24 @@ int main() {
     printf("Can X can win in %d\n", num_moves);
 
 
-    make_best_move(&board, X_side);
-    print_board(&board);
-    printf("\n");
+    while (!is_game_over(&board)) {
 
-    make_best_move(&board, X_side);
-    print_board(&board);
-    printf("\n");
+        make_best_move(&board, X_side);
+        print_board(&board);
+        printf("\n");
 
-    make_best_move(&board, X_side);
-    print_board(&board);
+        make_best_move(&board, O_side);
+        print_board(&board);
+        printf("\n");
+
+    }
+
+    
+    winner = check_win(&board);
+    if (winner == X_side)
+        printf("X won!\n");
+    if (winner == O_side)
+        printf("O won!\n");
 
     return 0;
 }
