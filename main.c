@@ -42,6 +42,14 @@ int wins[] = {0700, 070, 07, 0444, 0222, 0111, 0421, 0124};
 
 enum Sides {X_side, O_side, No_side};
 
+enum Sides other_side(enum Sides side) {
+
+    if (side == X_side)
+        return O_side;
+
+    return X_side;
+}
+
 typedef struct _board {
     short x;
     short o;
@@ -172,6 +180,7 @@ int can_win_in(Board *board, enum Sides side, int count) {
     Board new_board;
     int minimum_moves = INT_MAX;
     int num_moves;
+    int num_moves_other_side;
 
     short moves;
     short position;
@@ -214,6 +223,7 @@ void make_best_move(Board *board, enum Sides side) {
     int min_position;
     int min_num_moves = INT_MAX; 
     int num_moves;
+    int num_moves_other_side;
     int position;
     Board new_board;
     int moves;
@@ -235,6 +245,9 @@ void make_best_move(Board *board, enum Sides side) {
                 new_board.o |= position;
         
             num_moves = can_win_in(&new_board, side, 0);
+            num_moves_other_side = can_win_in(&new_board, other_side(side), 0);
+            num_moves -= 2 * num_moves_other_side;
+
             if (num_moves <= min_num_moves) {
                 min_position = position;
                 min_num_moves = num_moves;
@@ -259,13 +272,6 @@ int is_game_over(Board *board) {
     return 1;
 }
 
-enum Sides other_side(enum Sides side) {
-
-    if (side == X_side)
-        return O_side;
-
-    return X_side;
-}
 
 int main() {
 
@@ -285,6 +291,13 @@ int main() {
     turn = X_side;
 
     while (!is_game_over(&board)) {
+
+
+        printf("\n");
+
+        printf ("---------------------------------------------------\n");
+
+        printf("\n");
 
         printf ("%s turn:\n", turn == X_side ? "X" : "O");
 
