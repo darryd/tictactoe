@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 // http://stackoverflow.com/a/37539
 #define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
+
+#define NUM_OF_POSITIONS 9
 
 // | 1 1 1 | 1 1 1 | 1 1 1 |
 
@@ -10,30 +13,30 @@
 
    1  2  3
 
-1  _  _  _  
+   1  _  _  _  
 
-2  _  _  _
+   2  _  _  _
 
-3  _  _  _
+   3  _  _  _
 
 
-Possible wins:
+   Possible wins:
 
-Horizonal wins: 
-| 1 1 1 | 0 0 0 | 0 0 0 | = 0700 (octal)
-| 0 0 0 | 1 1 1 | 0 0 0 | =  070
-| 0 0 0 | 0 0 0 | 1 1 1 | =   07
+   Horizonal wins: 
+   | 1 1 1 | 0 0 0 | 0 0 0 | = 0700 (octal)
+   | 0 0 0 | 1 1 1 | 0 0 0 | =  070
+   | 0 0 0 | 0 0 0 | 1 1 1 | =   07
 
-Vertical wins:
-| 1 0 0 | 1 0 0 | 1 0 0 | = 0444
-| 0 1 0 | 0 1 0 | 0 1 0 | = 0222
-| 0 0 1 | 0 0 1 | 0 0 1 | = 0111
+   Vertical wins:
+   | 1 0 0 | 1 0 0 | 1 0 0 | = 0444
+   | 0 1 0 | 0 1 0 | 0 1 0 | = 0222
+   | 0 0 1 | 0 0 1 | 0 0 1 | = 0111
 
-Diagonal wins:
-| 1 0 0 | 0 1 0 | 0 0 1 | = 0421
-| 0 0 1 | 0 1 0 | 0 0 1 | = 0124
+   Diagonal wins:
+   | 1 0 0 | 0 1 0 | 0 0 1 | = 0421
+   | 0 0 1 | 0 1 0 | 0 0 1 | = 0124
 
-*/
+ */
 
 int wins[] = {0700, 070, 07, 0444, 0222, 0111, 0421, 0124};
 
@@ -105,7 +108,7 @@ int is_vacant(Board *board, short position) {
 }
 
 void print_winner(Board *board) {
-    
+
     enum Sides win;
 
     win = check_win(board);
@@ -158,16 +161,68 @@ void print_possible_moves(short moves, Board *board, enum Sides side) {
     }
 }
 
+int is_board_full(Board *board) {
+    return (board->x | board->o) == 0777;
+}
+
+
+int can_win_in(Board *board, enum Sides side, int count) {
+
+    enum Sides winner;
+    Board new_board;
+    int minimum_moves = INT_MAX;
+    int num_moves;
+
+    short moves;
+    short position;
+
+    winner = check_win(board);
+
+    if (is_board_full(board))
+        return INT_MAX;
+
+    if (winner == side)
+        return count;
+
+    if (winner == No_side) {
+
+        moves = get_possible_moves(board);
+        for (position = 0400; position > 0; position >>= 1) {
+            if ((position & moves) == position) {
+                memcpy(&new_board, board, sizeof(Board));
+
+                if (side == X_side)
+                    new_board.x |= position;
+                else 
+                    new_board.o |= position;
+
+                num_moves = can_win_in(&new_board, side, count + 1);
+                
+                if (num_moves < minimum_moves)
+                    minimum_moves = num_moves;
+            }
+        }
+
+        return minimum_moves;
+    }
+
+    return INT_MAX; // The other side won.
+}
+
 int main() {
 
     Board board;
     short moves;
+    int num_moves;
 
     init_board(&board);
-    board.o = 021;
+    board.o = 0600;
 
-    moves = get_possible_moves(&board);
-    print_possible_moves(moves, &board, X_side);
+
+    num_moves = can_win_in(&board, X_side, 0);
+
+    print_board(&board);
+    printf("Can X can win in %d\n", num_moves);
 
     return 0;
 }
