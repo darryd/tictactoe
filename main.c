@@ -51,6 +51,7 @@ typedef struct _player {
 typedef struct _game {
 
     Board board;
+    enum Sides turn;
 
     Player x_player;
     Player o_player;
@@ -99,6 +100,7 @@ void print_board(Board *board) {
 }
 
 int is_vacant(Board *board, short position) {
+
     return ((board->x | board->o) & position) != position;
 }
 
@@ -141,15 +143,18 @@ void print_possible_moves(short moves, Board *board, enum Sides side) {
 
     for (position = 0400; position > 0; position >>= 1) {
 
-        memcpy(&new_board, board, sizeof(Board));
-        if (side == X_side)
-            new_board.x |= position;
-        else
-            new_board.o |= position;
+        if ((position & moves) == position) {
 
-        printf("Board:\n");
-        print_board(&new_board);
-        printf("\n");
+            memcpy(&new_board, board, sizeof(Board));
+            if (side == X_side)
+                new_board.x |= position;
+            else
+                new_board.o |= position;
+
+            printf("Board:\n");
+            print_board(&new_board);
+            printf("\n");
+        }
     }
 }
 
