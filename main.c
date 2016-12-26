@@ -259,12 +259,21 @@ int is_game_over(Board *board) {
     return 1;
 }
 
+enum Sides other_side(enum Sides side) {
+
+    if (side == X_side)
+        return O_side;
+
+    return X_side;
+}
+
 int main() {
 
     Board board;
     short moves;
     int num_moves;
     enum Sides winner;
+    enum Sides turn;
 
     init_board(&board);
 
@@ -272,19 +281,18 @@ int main() {
     num_moves = can_win_in(&board, X_side, 0);
 
     print_board(&board);
-    printf("Can X can win in %d\n", num_moves);
 
+    turn = X_side;
 
     while (!is_game_over(&board)) {
 
-        make_best_move(&board, X_side);
+        printf ("%s turn:\n", turn == X_side ? "X" : "O");
+
+        make_best_move(&board, turn);
         print_board(&board);
         printf("\n");
 
-        make_best_move(&board, O_side);
-        print_board(&board);
-        printf("\n");
-
+        turn = other_side(turn);
     }
 
     
