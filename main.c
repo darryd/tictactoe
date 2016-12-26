@@ -197,7 +197,7 @@ int can_win_in(Board *board, enum Sides side, int count) {
                     new_board.o |= position;
 
                 num_moves = can_win_in(&new_board, side, count + 1);
-                
+
                 if (num_moves < minimum_moves)
                     minimum_moves = num_moves;
             }
@@ -208,6 +208,46 @@ int can_win_in(Board *board, enum Sides side, int count) {
 
     return INT_MAX; // The other side won.
 }
+
+void make_best_move(Board *board, enum Sides side) {
+
+    int min_position;
+    int min_num_moves = INT_MAX; 
+    int num_moves;
+    int position;
+    Board new_board;
+    int moves;
+
+    if (is_board_full(board))
+        return;
+
+
+    moves = get_possible_moves(board);
+
+    for(position = 0400; position > 0; position >>=1) {
+
+        if ((moves & position) == position) {
+
+            memcpy(&new_board, board, sizeof(Board));
+            if (side == X_side)
+                new_board.x |= position;
+            else
+                new_board.o |= position;
+        
+            num_moves = can_win_in(board, side, 0);
+            if (num_moves <= min_num_moves) {
+                min_position = position;
+                min_num_moves = num_moves;
+            }
+        }
+    }
+
+    if (side == X_side)
+        board->x |= min_position;
+    else
+        board->o |= min_position;
+}
+
 
 int main() {
 
@@ -223,6 +263,18 @@ int main() {
 
     print_board(&board);
     printf("Can X can win in %d\n", num_moves);
+
+
+    make_best_move(&board, X_side);
+    print_board(&board);
+    printf("\n");
+
+    make_best_move(&board, X_side);
+    print_board(&board);
+    printf("\n");
+
+    make_best_move(&board, X_side);
+    print_board(&board);
 
     return 0;
 }
