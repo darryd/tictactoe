@@ -48,7 +48,7 @@ typedef struct _board {
 } Board;
 
 typedef struct _player {
-    short (*f) (Board *board);
+    void (*f) (Board *board, enum Sides side);
 } Player;
 
 typedef struct _game {
@@ -248,6 +248,16 @@ void make_best_move(Board *board, enum Sides side) {
         board->o |= min_position;
 }
 
+int is_game_over(Board *board) {
+
+    if (is_board_full(board))
+        return 1;
+
+    if (check_win(board) == No_side)
+        return 0;
+
+    return 1;
+}
 
 int main() {
 
