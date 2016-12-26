@@ -267,7 +267,6 @@ int main() {
     enum Sides winner;
 
     init_board(&board);
-    board.o = 0600;
 
 
     num_moves = can_win_in(&board, X_side, 0);
