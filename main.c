@@ -260,6 +260,18 @@ void make_best_move(Board *board, enum Sides side) {
                 break;
             }
 
+            // Would the other side win if they made this move?
+            if (other_side(side) == X_side)
+                new_board.x |= position;
+            else
+                new_board.o |= position;
+
+            if (check_win(&new_board) == other_side(side)) {
+                // We better move here so that the other side can't
+                min_position = position;
+                break;
+            }
+
 
             num_moves = can_win_in(&new_board, side, 0, &ways);
             num_moves_other_side = can_win_in(&new_board, other_side(side), 0, NULL);
@@ -333,9 +345,12 @@ int main() {
     winner = check_win(&board);
     if (winner == X_side)
         printf("X won!\n");
-    if (winner == O_side)
+    else if (winner == O_side)
         printf("O won!\n");
+        
+    else 
+        printf("No winner\n");
 
         
-    return 0;
+    return;
 }
