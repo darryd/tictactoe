@@ -178,7 +178,6 @@ int can_win_in(Board *board, enum Sides side, int count, int *ways) {
     Board new_board;
     int minimum_moves = INT_MAX;
     int num_moves;
-    int num_moves_other_side;
 
     short moves;
     short position;
@@ -228,7 +227,6 @@ void make_best_move(Board *board, enum Sides side) {
     int min_position;
     int min_num_moves = INT_MAX; 
     int num_moves;
-    int num_moves_other_side;
     int position;
     Board new_board;
     int moves;
@@ -313,6 +311,7 @@ int main() {
     enum Sides turn;
 
     init_board(&board);
+    board.o = 021; // O in the middle to start
 
     num_moves = can_win_in(&board, X_side, 0, NULL);
 
@@ -349,5 +348,5 @@ int main() {
         printf("No winner\n");
 
         
-    return;
+    return 0;
 }
