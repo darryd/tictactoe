@@ -272,10 +272,7 @@ void make_best_move(Board *board, enum Sides side) {
                 break;
             }
 
-
             num_moves = can_win_in(&new_board, side, 0, &ways);
-            num_moves_other_side = can_win_in(&new_board, other_side(side), 0, NULL);
-            num_moves -= 2 * num_moves_other_side;
 
             if (num_moves == min_num_moves && ways > max_ways) {
                 min_position = position;
