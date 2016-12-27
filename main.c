@@ -55,9 +55,7 @@ typedef struct _board {
     short o;
 } Board;
 
-typedef struct _player {
-    void (*f) (Board *board, enum Sides side);
-} Player;
+typedef void (*Player) (Board *board, enum Sides side);
 
 typedef struct _game {
 
@@ -174,7 +172,7 @@ int is_board_full(Board *board) {
 }
 
 
-int can_win_in(Board *board, enum Sides side, int count) {
+int can_win_in(Board *board, enum Sides side, int count, int *ways) {
 
     enum Sides winner;
     Board new_board;
@@ -196,6 +194,10 @@ int can_win_in(Board *board, enum Sides side, int count) {
     if (winner == No_side) {
 
         moves = get_possible_moves(board);
+
+        if (ways != NULL)
+            *ways = 1;
+
         for (position = 0400; position > 0; position >>= 1) {
             if ((position & moves) == position) {
                 memcpy(&new_board, board, sizeof(Board));
@@ -205,7 +207,10 @@ int can_win_in(Board *board, enum Sides side, int count) {
                 else 
                     new_board.o |= position;
 
-                num_moves = can_win_in(&new_board, side, count + 1);
+                num_moves = can_win_in(&new_board, side, count + 1, NULL);
+
+                if (num_moves == minimum_moves && ways != NULL)
+                    (*ways)++;
 
                 if (num_moves < minimum_moves)
                     minimum_moves = num_moves;
@@ -227,12 +232,15 @@ void make_best_move(Board *board, enum Sides side) {
     int position;
     Board new_board;
     int moves;
+    int ways;
+    int max_ways;
 
     if (is_board_full(board))
         return;
 
 
     moves = get_possible_moves(board);
+    max_ways = 0;
 
     for(position = 0400; position > 0; position >>=1) {
 
@@ -244,13 +252,27 @@ void make_best_move(Board *board, enum Sides side) {
             else
                 new_board.o |= position;
         
-            num_moves = can_win_in(&new_board, side, 0);
-            num_moves_other_side = can_win_in(&new_board, other_side(side), 0);
+
+            if (check_win(&new_board) == side) {
+                // We won!
+
+                min_position = position;
+                break;
+            }
+
+
+            num_moves = can_win_in(&new_board, side, 0, &ways);
+            num_moves_other_side = can_win_in(&new_board, other_side(side), 0, NULL);
             num_moves -= 2 * num_moves_other_side;
 
-            if (num_moves <= min_num_moves) {
+            if (num_moves == min_num_moves && ways > max_ways) {
+                min_position = position;
+                max_ways = ways;
+            }
+            else if (num_moves < min_num_moves) {
                 min_position = position;
                 min_num_moves = num_moves;
+                max_ways = ways;
             }
         }
     }
@@ -283,8 +305,7 @@ int main() {
 
     init_board(&board);
 
-
-    num_moves = can_win_in(&board, X_side, 0);
+    num_moves = can_win_in(&board, X_side, 0, NULL);
 
     print_board(&board);
 
@@ -315,5 +336,6 @@ int main() {
     if (winner == O_side)
         printf("O won!\n");
 
+        
     return 0;
 }
