@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
+#include <time.h>
+#include <stdlib.h>
 
 // http://stackoverflow.com/a/37539
 #define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
@@ -229,6 +231,7 @@ void make_best_move(Board *board, enum Sides side) {
     int num_moves;
     int position;
     Board new_board;
+    Board new_board2;
     int moves;
     int ways;
     int max_ways;
@@ -259,22 +262,40 @@ void make_best_move(Board *board, enum Sides side) {
             }
 
             // Would the other side win if they made this move?
+            memcpy(&new_board2, board, sizeof(Board));
             if (other_side(side) == X_side)
-                new_board.x |= position;
+                new_board2.x |= position;
             else
-                new_board.o |= position;
+                new_board2.o |= position;
 
-            if (check_win(&new_board) == other_side(side)) {
+            if (check_win(&new_board2) == other_side(side)) {
                 // We better move here so that the other side can't
                 min_position = position;
                 break;
             }
 
+            printf("*************************************************************\n");
+            print_board(&new_board);
+            
+            ways = 0; //init 
             num_moves = can_win_in(&new_board, side, 0, &ways);
+
+            printf("num_moves = %d\nways = %d\n", num_moves, ways);
 
             if (num_moves == min_num_moves && ways > max_ways) {
                 min_position = position;
                 max_ways = ways;
+            }
+
+            else if (num_moves == min_num_moves && ways == max_ways) {
+
+
+                printf("Add randomness.\n");
+                // Add randomness to the decision making process here.
+                if (rand() % 2 == 0) {
+                    printf ("rand() %% 2 == 0\n");
+                    min_position = position;
+                }
             }
             else if (num_moves < min_num_moves) {
                 min_position = position;
@@ -310,10 +331,8 @@ int main() {
     enum Sides winner;
     enum Sides turn;
 
+    srand(time(NULL));
     init_board(&board);
-    board.o = 021; // O in the middle to start
-
-    num_moves = can_win_in(&board, X_side, 0, NULL);
 
     print_board(&board);
 
