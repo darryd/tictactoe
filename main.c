@@ -78,7 +78,7 @@ void init_board(Board *board) {
     memset(board, 0, sizeof(Board));
 }
 
-enum Sides check_win(Board *board) {
+enum Sides check_win(const Board *board) {
     int i;
 
     for (i = 0; i < NELEMS(wins); i++)
@@ -113,12 +113,26 @@ void print_board(const Board *board) {
     }
 }
 
+void print_binary(Position pos) {
+
+    int mask;
+    int count = 1;
+
+    for (mask = 0400; mask > 0; mask >>= 1, count++) {
+        if ((pos & mask) == mask)
+            printf("1");
+        else
+            printf("0");
+    }
+    printf("\n");
+}
+
 int is_vacant(const Board *board, Position position) {
 
     return ((board->x | board->o) & position) != position;
 }
 
-void print_winner(Board *board) {
+void print_winner(const Board *board) {
 
     enum Sides win;
 
@@ -150,7 +164,7 @@ Position get_possible_moves(const Board *board) {
     return moves;
 }
 
-void print_possible_moves(Position moves, Board *board, enum Sides side) {
+void print_possible_moves(Position moves, const Board *board, enum Sides side) {
 
     Board new_board;
     Position position;
@@ -177,7 +191,7 @@ int is_board_full(const Board *board) {
 }
 
 
-int can_win_in(Board *board, enum Sides side, int count, int *ways) {
+int can_win_in(const Board *board, enum Sides side, int count, int *ways) {
 
     enum Sides winner;
     Board new_board;
@@ -240,7 +254,7 @@ Position make_best_move(const Board *board, enum Sides side) {
     int moves;
     int ways;
     int max_ways;
- 
+
     if (is_board_full(board))
         return 0;
 
@@ -257,7 +271,7 @@ Position make_best_move(const Board *board, enum Sides side) {
                 new_board.x |= position;
             else
                 new_board.o |= position;
-        
+
 
             if (check_win(&new_board) == side) {
                 // We won!
@@ -301,16 +315,16 @@ Position make_best_move(const Board *board, enum Sides side) {
         }
     }
 
-/*
-    if (side == X_side)
-        board->x |= min_position;
-    else
-        board->o |= min_position;
-*/
+    /*
+       if (side == X_side)
+       board->x |= min_position;
+       else
+       board->o |= min_position;
+     */
     return min_position;
 }
 
-int is_game_over(Board *board) {
+int is_game_over(const Board *board) {
 
     if (is_board_full(board))
         return 1;
@@ -352,23 +366,23 @@ int main() {
 
         printf ("%s turn:\n", turn == X_side ? "X" : "O");
 
-        make_best_move(&board, turn);
+        print_binary(make_best_move(&board, turn));
         print_board(&board);
         printf("\n");
 
         turn = other_side(turn);
     }
 
-    
+
     winner = check_win(&board);
     if (winner == X_side)
         printf("X won!\n");
     else if (winner == O_side)
         printf("O won!\n");
-        
+
     else 
         printf("No winner\n");
 
-        
+
     return 0;
 }
