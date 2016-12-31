@@ -52,12 +52,15 @@ enum Sides other_side(enum Sides side) {
     return X_side;
 }
 
+typedef short Position;
+
 typedef struct _board {
-    short x;
-    short o;
+    Position x;
+    Position o;
 } Board;
 
-typedef void (*Player) (Board *board, enum Sides side);
+
+typedef Position (*Player) (const Board *board, enum Sides side);
 
 typedef struct _game {
 
@@ -89,7 +92,7 @@ enum Sides check_win(Board *board) {
     return No_side;
 }
 
-void print_board(Board *board) {
+void print_board(const Board *board) {
 
     int mask;
     int count = 1;
@@ -110,7 +113,7 @@ void print_board(Board *board) {
     }
 }
 
-int is_vacant(Board *board, short position) {
+int is_vacant(const Board *board, Position position) {
 
     return ((board->x | board->o) & position) != position;
 }
@@ -135,10 +138,10 @@ void print_winner(Board *board) {
     }
 }
 
-short get_possible_moves(Board *board) {
+Position get_possible_moves(const Board *board) {
 
-    short moves = 0;
-    short position;
+    Position moves = 0;
+    Position position;
 
     for (position = 0400; position > 0; position >>= 1)
         if (is_vacant(board, position))
@@ -147,10 +150,10 @@ short get_possible_moves(Board *board) {
     return moves;
 }
 
-void print_possible_moves(short moves, Board *board, enum Sides side) {
+void print_possible_moves(Position moves, Board *board, enum Sides side) {
 
     Board new_board;
-    short position;
+    Position position;
 
     for (position = 0400; position > 0; position >>= 1) {
 
@@ -169,7 +172,7 @@ void print_possible_moves(short moves, Board *board, enum Sides side) {
     }
 }
 
-int is_board_full(Board *board) {
+int is_board_full(const Board *board) {
     return (board->x | board->o) == 0777;
 }
 
@@ -181,8 +184,8 @@ int can_win_in(Board *board, enum Sides side, int count, int *ways) {
     int minimum_moves = INT_MAX;
     int num_moves;
 
-    short moves;
-    short position;
+    Position moves;
+    Position position;
 
     winner = check_win(board);
 
@@ -213,18 +216,20 @@ int can_win_in(Board *board, enum Sides side, int count, int *ways) {
                 if (num_moves == minimum_moves && ways != NULL)
                     (*ways)++;
 
-                if (num_moves < minimum_moves)
+                if (num_moves < minimum_moves) {
                     minimum_moves = num_moves;
+                    if (ways != NULL)
+                        *ways = 1;
+                }
             }
         }
-
         return minimum_moves;
     }
 
     return INT_MAX; // The other side won.
 }
 
-void make_best_move(Board *board, enum Sides side) {
+Position make_best_move(const Board *board, enum Sides side) {
 
     int min_position;
     int min_num_moves = INT_MAX; 
@@ -235,9 +240,9 @@ void make_best_move(Board *board, enum Sides side) {
     int moves;
     int ways;
     int max_ways;
-
+ 
     if (is_board_full(board))
-        return;
+        return 0;
 
 
     moves = get_possible_moves(board);
@@ -274,13 +279,7 @@ void make_best_move(Board *board, enum Sides side) {
                 break;
             }
 
-            printf("*************************************************************\n");
-            print_board(&new_board);
-            
-            ways = 0; //init 
             num_moves = can_win_in(&new_board, side, 0, &ways);
-
-            printf("num_moves = %d\nways = %d\n", num_moves, ways);
 
             if (num_moves == min_num_moves && ways > max_ways) {
                 min_position = position;
@@ -289,11 +288,8 @@ void make_best_move(Board *board, enum Sides side) {
 
             else if (num_moves == min_num_moves && ways == max_ways) {
 
-
-                printf("Add randomness.\n");
                 // Add randomness to the decision making process here.
                 if (rand() % 2 == 0) {
-                    printf ("rand() %% 2 == 0\n");
                     min_position = position;
                 }
             }
@@ -305,10 +301,13 @@ void make_best_move(Board *board, enum Sides side) {
         }
     }
 
+/*
     if (side == X_side)
         board->x |= min_position;
     else
         board->o |= min_position;
+*/
+    return min_position;
 }
 
 int is_game_over(Board *board) {
@@ -322,11 +321,15 @@ int is_game_over(Board *board) {
     return 1;
 }
 
+void play_game(Game *game, enum Sides who_goes_first) {
+
+
+}
 
 int main() {
 
     Board board;
-    short moves;
+    Position moves;
     int num_moves;
     enum Sides winner;
     enum Sides turn;
