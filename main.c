@@ -446,7 +446,6 @@ void play_game(Game *game, enum Sides who_goes_first) {
         printf("\n");
 
         print_board(&game->board);
-        sleep(1);
 
         move = turn == X_side ? game->x_player(&game->board, turn) : game->o_player(&game->board, turn);
         // TODO validate move
