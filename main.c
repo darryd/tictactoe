@@ -382,73 +382,41 @@ int is_game_over(const Board *board) {
 
 void play_game(Game *game, enum Sides who_goes_first) {
 
+    Position move;
+    enum Sides turn = who_goes_first;
 
+    while (!is_game_over(&game->board)) {
+
+        //printf("\33[2J\33[;H");
+        printf("%s turn:\n", turn == X_side ? "X" : "O");
+        printf("\n");
+        
+
+        move = turn == X_side ? game->x_player(&game->board, turn) : game->o_player(&game->board, turn);
+        play_position(&game->board, move, turn);
+
+        print_board(&game->board);
+
+        turn = other_side(turn);
+    }
+
+
+    print_winner(&game->board);
 }
 
 int main() {
 
-    Board board;
-    Position moves;
-    Position move;
-    int num_moves;
-    enum Sides winner;
-    enum Sides turn;
-
+    Game game;
+    init_board(&game.board);
     srand(time(NULL));
-    init_board(&board);
+
+    game.x_player = make_best_move;
+    game.o_player = make_best_move;
+
+    
+    play_game(&game, O_side);
 
 
-
-    //board.x = 0162;
-    //board.o = 0614;
-
-
-    print_board(&board);
-
-    turn = X_side;
-
-
-
-
-    //turn = O_side;
-
-    while (!is_game_over(&board)) {
-
-
-        printf("\33[2J\33[;H");
-        printf("\n");
-
-        printf ("---------------------------------------------------\n");
-
-        printf("\n");
-        printf ("%s turn:\n", turn == X_side ? "X" : "O");
-        printf("\n");
-
-        move = make_best_move(&board, turn);
-
-        if (number_of_positions(move) != 1) {
-            fprintf(stderr, "Error: number of positions == %d\n", number_of_positions(move));
-            exit(1);
-        }
-
-        play_position(&board, move, turn);
-
-        print_board(&board);
-        printf("\n");
-
-        turn = other_side(turn);
-        sleep(1);
-    }
-
-
-    winner = check_win(&board);
-    if (winner == X_side)
-        printf("X won!\n");
-    else if (winner == O_side)
-        printf("O won!\n");
-
-    else 
-        printf("No winner\n");
 
     return 0;
 }
