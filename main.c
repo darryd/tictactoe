@@ -110,6 +110,7 @@ void print_board(const Board *board) {
     int mask;
     int count = 1;
 
+    printf("   ");
     for (mask = 0400; mask > 0; mask >>= 1, count++) {
 
         if ((board->x & mask) == mask)
@@ -121,7 +122,7 @@ void print_board(const Board *board) {
 
         if (count % 3 == 0) {
             count = 0;
-            printf("\n");
+            printf("\n   ");
         }
     }
 }
@@ -271,6 +272,28 @@ int can_win_in(const Board *board, enum Sides side, int count, int *ways) {
     return INT_MAX; // The other side won.
 }
 
+Position make_random_move(const Board *board, enum Sides side) {
+
+    Position pos;
+    Position moves;
+    Position list_moves[9];
+    int count = 0;
+
+    moves = get_possible_moves(board);
+    
+    for (pos = 0400; pos > 0; pos >>= 1) {
+        if ((moves & pos) == pos) {
+            list_moves[count++] = pos;
+        }
+    }
+    
+    if (count == 0)
+        return 0; // There were no posible moves.
+
+    return list_moves[rand() % count];
+}
+
+
 Position make_best_move(const Board *board, enum Sides side) {
 
     int min_position;
@@ -291,20 +314,12 @@ Position make_best_move(const Board *board, enum Sides side) {
 
     for(position = 0400; position > 0; position >>=1) {
 
-        //printf("===========================================\n");
-
-        //printf("Position: ");
-        //print_binary(position);
-
-        //printf("===========================================\n");
-
         if ((moves & position) != position) {
 
             //printf("(moves & position) != position\n");
             continue;
         }
 
-        //printf("(moves & position) == position\n");
         memcpy(&new_board, board, sizeof(Board));
 
         if (side == X_side)
@@ -335,37 +350,24 @@ Position make_best_move(const Board *board, enum Sides side) {
 
         num_moves = can_win_in(&new_board, side, 0, &ways);
 
-        //printf("num_moves = %d\nmin_num_moves %d\nways = %d\nmax_ways %d\n", num_moves, min_num_moves, ways, max_ways);
-
-
         if (num_moves == min_num_moves && ways > max_ways) {
-            //printf("%d\n", __LINE__);
             min_position = position;
             max_ways = ways;
         }
 
         else if (num_moves == min_num_moves && ways == max_ways) {
-            //printf("%d\n", __LINE__);
-
             // Add randomness to the decision making process here.
             if (rand() % 2 == 0) {
                 min_position = position;
             }
         }
         else if (num_moves < min_num_moves) {
-            //printf("%d\n", __LINE__);
             min_position = position;
             min_num_moves = num_moves;
             max_ways = ways;
         }
     }
 
-    /*
-       if (side == X_side)
-       board->x |= min_position;
-       else
-       board->o |= min_position;
-     */
     return min_position;
 }
 
@@ -387,36 +389,43 @@ void play_game(Game *game, enum Sides who_goes_first) {
 
     while (!is_game_over(&game->board)) {
 
-        //printf("\33[2J\33[;H");
+        printf("\33[2J\33[;H");
         printf("%s turn:\n", turn == X_side ? "X" : "O");
         printf("\n");
         
+        print_board(&game->board);
+        sleep(1);
 
         move = turn == X_side ? game->x_player(&game->board, turn) : game->o_player(&game->board, turn);
+        // TODO validate move
         play_position(&game->board, move, turn);
 
-        print_board(&game->board);
 
         turn = other_side(turn);
     }
 
 
+    printf("\33[2J\33[;H");
+    printf("%s turn:\n", other_side(turn) == X_side ? "X" : "O");
+    printf("\n");
+    print_board(&game->board);
+    printf("\n");
     print_winner(&game->board);
+
+    sleep(1);
 }
 
 int main() {
 
     Game game;
-    init_board(&game.board);
     srand(time(NULL));
 
-    game.x_player = make_best_move;
+    game.x_player = make_random_move;
     game.o_player = make_best_move;
 
-    
-    play_game(&game, O_side);
-
-
-
+    while (1) {
+        init_board(&game.board);
+        play_game(&game, O_side);
+    }
     return 0;
 }
