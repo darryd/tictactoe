@@ -9,7 +9,7 @@
 #define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
 
 #define NUM_OF_POSITIONS 9
-
+#define MAX_LENGTH 1024
 // | 1 1 1 | 1 1 1 | 1 1 1 |
 
 /*
@@ -137,7 +137,7 @@ int number_of_positions(Position pos) {
         if ((pos & mask) == mask)
             count++;
     }
-    
+
     return count;
 }
 
@@ -149,12 +149,12 @@ int is_vacant(const Board *board, Position position) {
 void play_position(Board *board, Position position, enum Sides side) {
 
     if (!is_vacant(board, position)) {
-       
-       fprintf(stderr, "Board is not vacant at that position!\n");
-       print_board(board);
-       print_binary(position);
 
-       exit(1);
+        fprintf(stderr, "Board is not vacant at that position!\n");
+        print_board(board);
+        print_binary(position);
+
+        exit(1);
     }
 
     if (side == X_side)
@@ -272,6 +272,58 @@ int can_win_in(const Board *board, enum Sides side, int count, int *ways) {
     return INT_MAX; // The other side won.
 }
 
+
+// From: http://stackoverflow.com/a/15827913
+#define BUFFER 32
+char *readString()
+{
+    char *str = malloc(sizeof(char) * BUFFER), *err;
+    int pos;
+    for(pos = 0; str != NULL && (str[pos] = getchar()) != '\n'; pos++)
+    {
+        if(pos % BUFFER == BUFFER - 1)
+        {
+            if((err = realloc(str, sizeof(char) * (BUFFER + pos + 1))) == NULL)
+                free(str);
+            str = err;
+        }
+    }
+    if(str != NULL)
+        str[pos] = '\0';
+    return str;
+}
+
+
+Position get_move_from_user(const Board *board, enum Sides side) {
+
+    char *input;
+    char number;
+    Position move;
+
+    while (1) {
+        do {
+            printf("\n");
+            printf("Type a number 1 to 9:\n\n");
+            printf("\n   1 2 3\n   4 5 6\n   7 8 9\n\n");
+            input = readString();
+            printf("%s\n", input);
+
+            number = atol(input);
+            free(input);
+
+        } while (number < 1 || number > 9);
+
+        move = 01000 >> number;
+
+        if (is_vacant(board, move))
+            break;
+        else
+            printf("Invalid move.\n");
+    }
+
+    return move;
+}
+
 Position make_random_move(const Board *board, enum Sides side) {
 
     Position pos;
@@ -280,13 +332,13 @@ Position make_random_move(const Board *board, enum Sides side) {
     int count = 0;
 
     moves = get_possible_moves(board);
-    
+
     for (pos = 0400; pos > 0; pos >>= 1) {
         if ((moves & pos) == pos) {
             list_moves[count++] = pos;
         }
     }
-    
+
     if (count == 0)
         return 0; // There were no posible moves.
 
@@ -392,7 +444,7 @@ void play_game(Game *game, enum Sides who_goes_first) {
         printf("\33[2J\33[;H");
         printf("%s turn:\n", turn == X_side ? "X" : "O");
         printf("\n");
-        
+
         print_board(&game->board);
         sleep(1);
 
@@ -411,8 +463,6 @@ void play_game(Game *game, enum Sides who_goes_first) {
     print_board(&game->board);
     printf("\n");
     print_winner(&game->board);
-
-    sleep(1);
 }
 
 int main() {
@@ -420,11 +470,11 @@ int main() {
     Game game;
     srand(time(NULL));
 
-    game.x_player = make_random_move;
+    game.x_player = get_move_from_user;
     game.o_player = make_best_move;
 
     init_board(&game.board);
-    play_game(&game, O_side);
+    play_game(&game, X_side);
 
     return 0;
 }
