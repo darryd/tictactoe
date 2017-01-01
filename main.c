@@ -423,9 +423,8 @@ int main() {
     game.x_player = make_random_move;
     game.o_player = make_best_move;
 
-    while (1) {
-        init_board(&game.board);
-        play_game(&game, O_side);
-    }
+    init_board(&game.board);
+    play_game(&game, O_side);
+
     return 0;
 }
