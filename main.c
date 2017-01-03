@@ -353,7 +353,6 @@ Position make_best_move(const Board *board, enum Sides side) {
     int num_moves;
     int position;
     Board new_board;
-    Board new_board2;
     int moves;
     int ways;
     int max_ways;
@@ -364,41 +363,41 @@ Position make_best_move(const Board *board, enum Sides side) {
     moves = get_possible_moves(board);
     max_ways = 0;
 
+    // Look for a win
+    for (position = 0400; position > 0; position >>= 1) {
+        if ((moves & position) != position)
+            continue;
+
+        memcpy(&new_board, board, sizeof(Board));
+        play_position(&new_board, position, side);
+
+        if (check_win(&new_board) == side)
+            return position; // We won!
+    }
+
+    // Look for a lose, and prevent it
+    // Would the other side win if they made this move?
+    for (position = 0400; position > 0; position >>= 1) {
+        if ((moves & position) != position)
+            continue;
+
+        memcpy(&new_board, board, sizeof(Board));
+        play_position(&new_board, position, other_side(side));
+
+        if (check_win(&new_board) == other_side(side))
+            return position; // Let's move here so that the other side can't.
+    }
+
+    // Look for the best move
+
     for(position = 0400; position > 0; position >>=1) {
 
         if ((moves & position) != position) {
-
-            //printf("(moves & position) != position\n");
             continue;
         }
 
         memcpy(&new_board, board, sizeof(Board));
-
-        if (side == X_side)
-            new_board.x |= position;
-        else
-            new_board.o |= position;
-
-
-        if (check_win(&new_board) == side) {
-            // We won!
-
-            min_position = position;
-            break;
-        }
-
-        // Would the other side win if they made this move?
-        memcpy(&new_board2, board, sizeof(Board));
-        if (other_side(side) == X_side)
-            new_board2.x |= position;
-        else
-            new_board2.o |= position;
-
-        if (check_win(&new_board2) == other_side(side)) {
-            // We better move here so that the other side can't
-            min_position = position;
-            break;
-        }
+        play_position(&new_board, position, side);
 
         num_moves = can_win_in(&new_board, side, 0, &ways);
 
