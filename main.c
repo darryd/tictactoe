@@ -19,7 +19,6 @@ Command line tic tac toe
 
 #define NUM_OF_POSITIONS 9
 #define MAX_LENGTH 1024
-// | 1 1 1 | 1 1 1 | 1 1 1 |
 
 /*
 
