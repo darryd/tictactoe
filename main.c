@@ -11,9 +11,9 @@ The board has nine positions like:
 
 These positions have three states: vacant, occupied by an x, or occupied by an o.
 
-We will represent the board as a two 9 bit numbers to represent when a position on
-the board is occupied by either an x or an o. A 1 means that a position is occupied,
-while a 0 means that a position is vacant.
+We will represent the board using two 9 bit numbers (one for x's and the other for o's)
+to represent when a position onthe board is occupied by either an x or an o. A 1 means 
+that a position is occupied,while a 0 means that a position is vacant.
 
 The first row will be represented by the first 3 bits. The second row by the next
 three bits. And the third row, by the last three bits.
