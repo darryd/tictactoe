@@ -3,25 +3,6 @@
 
 Command line tic tac toe
 
-*/
-
-
-
-#include <stdio.h>
-#include <string.h>
-#include <limits.h>
-#include <time.h>
-#include <stdlib.h>
-#include <unistd.h>
-
-// http://stackoverflow.com/a/37539
-#define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
-
-#define NUM_OF_POSITIONS 9
-#define MAX_LENGTH 1024
-
-/*
-
 The board has nine positions like:
 
      - - - 
@@ -48,22 +29,47 @@ Would have two numbers:
 x: 100 010 001
 o: 010 001 000
 
-To see if a position is occupied by either an x or an o, we can OR x and o.
-So in our example, x OR o == 110 011 001 
+To see if a position is occupied by either an x or an o, we can OR x and o. Then
+we can AND it with the position. 
 
-Because each row is represented by three bits, it is convenient to represent each row
+For example, 
+Suppose we label the board like this:
+
+1 2 3
+4 5 6 
+7 8 9
+
+We can now say that the 5th position is the position in the very middle of the board.
+So positon = 000 010 000
+
+So (x OR o) AND position == position if position is occupied.
+
+Let's try it given that x = 100 010 001 and o = 010 001 000.
+
+    100 010 001 
+ OR 010 001 000
+    -----------
+    110 011 001
+AND 000 010 000
+    -----------
+    000 010 000 
+
+Since we end up with 000 010 000 we know that the 5th position is occupied. Otherwise,
+we would have ended up with 000 000 000.
+
+Because each row is represented by three bits, it is convenient to represent each row 
 with an octal digit.
 
 So continuing or example:
-x: 0421
-o: 0220
+x: 100 010 001 = 0421
+o: 010 001 000 = 0220
  
 To win at tic tac toe, a player (x or o) can win in one of eight ways:
 
    Horizonal wins: 
-    111  000  000  = 0700
-    000  111  000  =  070
-    000  000  111  =   07
+    111 000 000  = 0700
+    000 111 000  =  070
+    000 000 111  =   07
 
    Vertical wins:
     100 100 100 = 0444
@@ -75,6 +81,19 @@ To win at tic tac toe, a player (x or o) can win in one of eight ways:
    001 010 001 = 0124
 
  */
+
+#include <stdio.h>
+#include <string.h>
+#include <limits.h>
+#include <time.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+// http://stackoverflow.com/a/37539
+#define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
+
+#define NUM_OF_POSITIONS 9
+#define MAX_LENGTH 1024
 
 int wins[] = {0700, 070, 07, 0444, 0222, 0111, 0421, 0124};
 
