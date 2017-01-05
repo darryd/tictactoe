@@ -1,3 +1,12 @@
+
+/*
+
+Command line tic tac toe
+
+*/
+
+
+
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
@@ -14,30 +23,57 @@
 
 /*
 
-   1  2  3
+The board has nine positions like:
 
-   1  _  _  _  
+     - - - 
+     - - - 
+     - - - 
 
-   2  _  _  _
+These positions have three states: vacant, occupied by an x, or occupied by an o.
 
-   3  _  _  _
+We will represent the board as a two 9 bit numbers to represent when a position on
+the board is occupied by either an x or an o. A 1 means that a position is occupied,
+while a 0 means that a position is vacant.
 
+The first row will be represented by the first 3 bits. The second row by the next
+three bits. And the third row, by the last three bits.
 
-   Possible wins:
+For example,
+
+    X 0 -
+    - X 0
+    - - X
+
+Would have two numbers:
+
+x: 100 010 001
+o: 010 001 000
+
+To see if a position is occupied by either an x or an o, we can OR x and o.
+So in our example, x OR o == 110 011 001 
+
+Because each row is represented by three bits, it is convenient to represent each row
+with an octal digit.
+
+So continuing or example:
+x: 0421
+o: 0220
+ 
+To win at tic tac toe, a player (x or o) can win in one of eight ways:
 
    Horizonal wins: 
-   | 1 1 1 | 0 0 0 | 0 0 0 | = 0700 (octal)
-   | 0 0 0 | 1 1 1 | 0 0 0 | =  070
-   | 0 0 0 | 0 0 0 | 1 1 1 | =   07
+    111  000  000  = 0700
+    000  111  000  =  070
+    000  000  111  =   07
 
    Vertical wins:
-   | 1 0 0 | 1 0 0 | 1 0 0 | = 0444
-   | 0 1 0 | 0 1 0 | 0 1 0 | = 0222
-   | 0 0 1 | 0 0 1 | 0 0 1 | = 0111
+    100 100 100 = 0444
+    010 010 010 = 0222
+    001 001 001 = 0111
 
    Diagonal wins:
-   | 1 0 0 | 0 1 0 | 0 0 1 | = 0421
-   | 0 0 1 | 0 1 0 | 0 0 1 | = 0124
+   100 010 001 = 0421
+   001 010 001 = 0124
 
  */
 
@@ -50,7 +86,10 @@ enum Sides other_side(enum Sides side) {
     if (side == X_side)
         return O_side;
 
-    return X_side;
+    if (side == O_side)
+        return  X_side;
+
+    return No_side;
 }
 
 typedef short Position;
