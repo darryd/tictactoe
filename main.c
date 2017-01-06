@@ -397,7 +397,7 @@ Position make_random_move(const Board *board, enum Sides side) {
     }
 
     if (count == 0)
-        return 0; // There were no posible moves.
+        return 0; // There were no possible moves.
 
     return list_moves[rand() % count];
 }
