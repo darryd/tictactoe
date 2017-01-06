@@ -3,7 +3,7 @@
 
 Command line tic tac toe
 
-The board has nine positions like:
+The board has nine positions:
 
      - - - 
      - - - 
@@ -12,7 +12,7 @@ The board has nine positions like:
 These positions have three states: vacant, occupied by an x, or occupied by an o.
 
 We will represent the board using two 9 bit numbers (one for x's and the other for o's)
-to represent when a position onthe board is occupied by either an x or an o. A 1 means 
+to represent when a position on the board is occupied by either an x or an o. A 1 means 
 that a position is occupied,while a 0 means that a position is vacant.
 
 The first row will be represented by the first 3 bits. The second row by the next
@@ -60,7 +60,7 @@ we would have ended up with 000 000 000.
 Because each row is represented by three bits, it is convenient to represent each row 
 with an octal digit.
 
-So continuing or example:
+So continuing our example:
 x: 100 010 001 = 0421
 o: 010 001 000 = 0220
  
